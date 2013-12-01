@@ -4,3 +4,4 @@ Gemfile.lock
 pkg/
 coverage/
 *.swp
+spec/support/redis/
