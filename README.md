@@ -3,8 +3,7 @@ sidekiq-rate-limiter
 
 [![Build Status](https://secure.travis-ci.org/enova/sidekiq-rate-limiter.png)](http://travis-ci.org/enova/sidekiq-rate-limiter)
 
-Adds to sidekiq the ability to rate limit job execution on a per-worker basis in
-a redis-backed fashion.
+Redis-backed, per-worker rate limits for job processing.
 
 ## Compatibility
 
@@ -12,10 +11,10 @@ sidekiq-rate-limiter is actively tested against MRI versions 2.0.0 and 1.9.3.
 
 sidekiq-rate-limiter works by using a custom fetch class, the class responsible
 for pulling work from the queue stored in redis. Consequently you'll want to be
-careful about using other gems that use a same strategy ([sidekiq-priority](https://github.com/socialpandas/sidekiq-priority)
+careful about using other gems that use a same strategy, [sidekiq-priority](https://github.com/socialpandas/sidekiq-priority)
 being one example.
 
-I've attempted to support the same options as used by [sidekiq-throttler](/gevans/sidekiq-throttler). So, if
+I've attempted to support the same options as used by [sidekiq-throttler](https://github.com/gevans/sidekiq-throttler). So, if
 your worker already looks like this example I lifted from the sidekiq-throttler wiki:
 
 ```ruby
@@ -90,7 +89,7 @@ will place any items that are beyond the threshold at the back of their queue.
 ## Motivation
 
 Sidekiq::Throttler is great for smaller quantities of jobs, but falls down a bit
-for larger queues (see [issue #8](/gevans/sidekiq-throttler/issues/8). In addition, jobs that are
+for larger queues (see [issue #8](https://github.com/gevans/sidekiq-throttler/issues/8)). In addition, jobs that are
 limited multiple times are counted as 'processed' each time, so the stats baloon quickly.
 
 ## TODO

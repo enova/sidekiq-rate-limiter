@@ -11,8 +11,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Blake Thomas", "Enova"]
   s.email       = ["bwthomas@gmail.com"]
   s.homepage    = "https://github.com/enova/sidekiq-rate-limiter"
-  s.summary     = %q{Rate-limit Sidekiq fetches by worker class}
-  s.description = %q{Rate-limit Sidekiq fetches by worker class}
+  s.summary     = %q{Redis-backed, per-worker rate limits for job processing}
+  s.description = %q{Redis-backed, per-worker rate limits for job processing}
   s.rubyforge_project = "nowarning"
 
   s.files         = `git ls-files`.split("\n")
