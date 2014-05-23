@@ -61,4 +61,21 @@ describe Sidekiq::RateLimiter::Fetch do
     q.size.should == 1
   end
 
+  it 'should not rate-limit work on a different host', queuing: true do
+    fetch = described_class.new(options)
+
+    worker.perform_async(*args)
+    worker.perform_async(*args)
+
+    fetch.retrieve_work
+
+    Sidekiq::RateLimiter::Limit.any_instance.should_receive(:hostname).and_return('not_this_host')
+
+    work = fetch.retrieve_work
+    JSON.parse(work.message)['class'].should eq 'Job'
+
+    q = Sidekiq::Queue.new(queue)
+    q.size.should == 0
+  end
+
 end
