@@ -47,7 +47,13 @@ module Sidekiq::RateLimiter
       name = options.delete('name') ||
              options.delete(:name)
 
-      super(name, redis, options)
+      super("#{hostname}:#{name}", redis, options)
+    end
+
+    private
+
+    def hostname
+      Socket.gethostname
     end
   end
 
