@@ -86,6 +86,20 @@ The configuration above would result in any jobs beyond the first 50 in a one
 hour period being delayed. The server will continue to fetch items from redis, &
 will place any items that are beyond the threshold at the back of their queue.
 
+### Per-server Rate Limits
+
+In some use cases, you may have a Sidekiq server process running on each of several hosts, and you wish to limit the rate that jobs are executed on each server, rather than across all servers. To do this, add `:per_server => true` to your `:rate` hash:
+
+    sidekiq_options :queue => 'some_silly_queue',
+                    :rate  => {
+                      :name       => 'my_super_awesome_rate_limit',
+                      :limit      => 50,
+                      :per_server => true, # Limit rater per Sidekiq server
+                      :period     => 3600,
+                    }
+
+This will measure the rate of jobs executed for each distinct value of `Socket.gethostname` (i.e. for each host where you have a Sidekiq server running).
+
 ## Motivation
 
 Sidekiq::Throttler is great for smaller quantities of jobs, but falls down a bit
