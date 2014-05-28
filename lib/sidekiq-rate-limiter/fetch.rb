@@ -12,10 +12,12 @@ module Sidekiq::RateLimiter
     end
 
     def limit(work)
-      message = JSON.parse(work.message) rescue {}
+      @message = JSON.parse(work.message) rescue {}
 
-      klass     = message['class']
-      rate      = message['rate'] || message['throttle'] || {}
+      args      = @message['args']
+      klass     = @message['class']
+      rate      = use_server_rate? ? server_rate : client_rate
+
       limit     = rate['limit']   || rate['threshold']
       interval  = rate['period']  || rate['interval']
       name      = rate['name']    || DEFAULT_LIMIT_NAME
@@ -23,9 +25,9 @@ module Sidekiq::RateLimiter
       return work unless !!(klass && limit && interval)
 
       options = {
-        :limit    => limit,
-        :interval => interval,
-        :name     => name,
+        :limit    => (limit.respond_to?(:call) ? limit.call(*args) : limit).to_i,
+        :interval => (interval.respond_to?(:call) ? interval.call(*args) : interval).to_f,
+        :name     => (name.respond_to?(:call) ? name.call(*args) : name).to_s,
       }
 
       Sidekiq.redis do |conn|
@@ -38,6 +40,28 @@ module Sidekiq::RateLimiter
           work
         end
       end
+    end
+
+    private
+
+    def use_server_rate?
+      server_rate['limit'] && server_rate['limit'].respond_to?(:call) ||
+        server_rate['threshold'] && server_rate['threshold'].respond_to?(:call) ||
+        server_rate['period'] && server_rate['period'].respond_to?(:call) ||
+        server_rate['interval'] && server_rate['interval'].respond_to?(:call) ||
+        server_rate['name'] && server_rate['name'].respond_to?(:call)
+    end
+
+    def client_rate
+      @client_rate ||= @message['rate'] || @message['throttle'] || {}
+    end
+
+    def server_rate
+      return @server_rate if @server_rate
+
+      worker_class = @message['class']
+      options = Object.const_get(worker_class).get_sidekiq_options
+      @server_rate = options['rate'] || options['throttle'] || {}
     end
   end
 
