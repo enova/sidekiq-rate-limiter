@@ -107,13 +107,13 @@ class Job
     ## do something
 ```
 
-**Caveat**: Normally, Sidekiq stores the `sidekiq_options` with the job on your Redis server at the time the job is enqueued, and it is these stored values that are used for rate-limiting. This means that if you deploy a new version of your code with different `sidekiq_options`, the alread-queued jobs will continue to behave according to the options that were in place when they were created. When you supply a `Proc` for one or more of your configuration options, your rate-limiting options can no longer be stored in Redis, but must instead be calculated when the job is fetched by your Sidekiq server for potential execution. If your application code changes while a job is in the queue, it may run with different `sidekiq_options` than existed when it was first enqueued.
+**Caveat**: Normally, Sidekiq stores the `sidekiq_options` with the job on your Redis server at the time the job is enqueued, and it is these stored values that are used for rate-limiting. This means that if you deploy a new version of your code with different `sidekiq_options`, the already-queued jobs will continue to behave according to the options that were in place when they were created. When you supply a `Proc` for one or more of your configuration options, your rate-limiting options can no longer be stored in Redis, but must instead be calculated when the job is fetched by your Sidekiq server for potential execution. If your application code changes while a job is in the queue, it may run with different `sidekiq_options` than existed when it was first enqueued.
 
 ## Motivation
 
 Sidekiq::Throttler is great for smaller quantities of jobs, but falls down a bit
 for larger queues (see [issue #8](https://github.com/gevans/sidekiq-throttler/issues/8)). In addition, jobs that are
-limited multiple times are counted as 'processed' each time, so the stats baloon quickly.
+limited multiple times are counted as 'processed' each time, so the stats balloon quickly.
 
 ## TODO
 
