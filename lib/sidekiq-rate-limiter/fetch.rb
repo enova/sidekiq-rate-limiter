@@ -60,7 +60,7 @@ module Sidekiq::RateLimiter
       return @server_rate if @server_rate
 
       worker_class = @message['class']
-      options = Object.const_get(worker_class).get_sidekiq_options
+      options = Object.const_get(worker_class).get_sidekiq_options rescue {}
       @server_rate = options['rate'] || options['throttle'] || {}
     end
   end
