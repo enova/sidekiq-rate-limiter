@@ -12,17 +12,17 @@ module Sidekiq::RateLimiter
     end
 
     def limit(work)
-      @message = JSON.parse(work.message) rescue {}
+      message = JSON.parse(work.message) rescue {}
 
-      args      = @message['args']
-      klass     = @message['class']
-      rate      = use_server_rate? ? server_rate : client_rate
+      args      = message['args']
+      klass     = message['class']
+      rate      = Rate.new(message)
 
-      limit     = rate['limit']   || rate['threshold']
-      interval  = rate['period']  || rate['interval']
-      name      = rate['name']    || DEFAULT_LIMIT_NAME
+      return work unless !!(klass && rate.valid?)
 
-      return work unless !!(klass && limit && interval)
+      limit     = rate.limit
+      interval  = rate.interval
+      name      = rate.name
 
       options = {
         :limit    => (limit.respond_to?(:call) ? limit.call(*args) : limit).to_i,
@@ -42,7 +42,34 @@ module Sidekiq::RateLimiter
       end
     end
 
+  end
+
+  class Rate
+    def initialize(message)
+      @message = message
+    end
+
+    def limit
+      rate['limit'] || rate['threshold']
+    end
+
+    def interval
+      rate['interval'] || rate['period']
+    end
+
+    def name
+      rate['name'] || DEFAULT_LIMIT_NAME
+    end
+
+    def valid?
+      !!(limit && interval)
+    end
+
     private
+
+    def rate
+      use_server_rate? ? server_rate : client_rate
+    end
 
     def use_server_rate?
       server_rate['limit'] && server_rate['limit'].respond_to?(:call) ||
