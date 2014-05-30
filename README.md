@@ -86,15 +86,37 @@ The configuration above would result in any jobs beyond the first 50 in a one
 hour period being delayed. The server will continue to fetch items from redis, &
 will place any items that are beyond the threshold at the back of their queue.
 
+### Dynamic Configuration
+
+The simplest way to set the rate-limiting options (`:name`, `:limit`, and `:period`) is to assign them each a static value (as above). In some cases, you may wish to calculate values for these options for each specific job. You can do this by supplying a `Proc` for any or all of these options.
+
+The `Proc` may receive as its arguments the same values that will be passed to `perform` when the job is finally performed.
+
+```ruby
+class Job
+  include Sidekiq::Worker
+
+  sidekiq_options :queue => "my_queue",
+                  :rate => {
+                    :name   => ->(user_id, rate_limit) { user_id },
+                    :limit  => ->(user_id, rate_limit) { rate_limit },
+                    :period => ->{ Date.today.monday? ? 2.hours : 4.hours }, # can ignore arguments
+                  }
+
+  def perform(user_id, rate_limit)
+    ## do something
+```
+
+**Caveat**: Normally, Sidekiq stores the `sidekiq_options` with the job on your Redis server at the time the job is enqueued, and it is these stored values that are used for rate-limiting. This means that if you deploy a new version of your code with different `sidekiq_options`, the already-queued jobs will continue to behave according to the options that were in place when they were created. When you supply a `Proc` for one or more of your configuration options, your rate-limiting options can no longer be stored in Redis, but must instead be calculated when the job is fetched by your Sidekiq server for potential execution. If your application code changes while a job is in the queue, it may run with different `sidekiq_options` than existed when it was first enqueued.
+
 ## Motivation
 
 Sidekiq::Throttler is great for smaller quantities of jobs, but falls down a bit
 for larger queues (see [issue #8](https://github.com/gevans/sidekiq-throttler/issues/8)). In addition, jobs that are
-limited multiple times are counted as 'processed' each time, so the stats baloon quickly.
+limited multiple times are counted as 'processed' each time, so the stats balloon quickly.
 
 ## TODO
 
-* Most or all of the configuration options should support procs
 * While it subclasses instead of monkey patching, setting Sidekiq.options[:fetch]
 is still asking for interaction issues. It would be better for this to be directly
 in sidekiq or to use some other means to accomplish this goal.

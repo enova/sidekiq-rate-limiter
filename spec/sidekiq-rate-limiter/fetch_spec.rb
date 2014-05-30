@@ -14,6 +14,17 @@ describe Sidekiq::RateLimiter::Fetch do
                       }
       def perform(*args); end
     end
+    class ProcJob
+      include Sidekiq::Worker
+      sidekiq_options 'queue'    => 'basic',
+                      'retry'    => false,
+                      'rate' => {
+                          'limit'  => ->(arg1, arg2) { arg2 },
+                          'name'   => ->(arg1, arg2) { arg2 },
+                          'period' => ->(arg1, arg2) { arg2 }
+                      }
+      def perform(arg1, arg2); end
+    end
   end
 
   let(:options)       { { queues: [queue, another_queue, another_queue] } }
@@ -21,6 +32,7 @@ describe Sidekiq::RateLimiter::Fetch do
   let(:another_queue) { 'some_other_queue' }
   let(:args)          { ['I am some args'] }
   let(:worker)        { Job }
+  let(:proc_worker)   { ProcJob }
   let(:redis_class)   { Sidekiq.redis { |conn| conn.class } }
 
   it 'should inherit from Sidekiq::BasicFetch' do
@@ -60,6 +72,15 @@ describe Sidekiq::RateLimiter::Fetch do
 
     q = Sidekiq::Queue.new(queue)
     q.size.should == 1
+  end
+
+  it 'should accept procs for limit, name, and period config keys', queuing: true do
+    proc_worker.perform_async(1,2)
+
+    Sidekiq::RateLimiter::Limit.should_receive(:new).with(anything(), {:limit => 2, :interval => 2, :name => "2"}).and_call_original
+
+    fetch = described_class.new(options)
+    work   = fetch.retrieve_work
   end
 
 end
