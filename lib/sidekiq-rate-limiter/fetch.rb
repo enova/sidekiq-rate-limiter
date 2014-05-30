@@ -14,18 +14,20 @@ module Sidekiq::RateLimiter
     def limit(work)
       message = JSON.parse(work.message) rescue {}
 
-      klass     = message['class']
-      rate      = message['rate'] || message['throttle'] || {}
-      limit     = rate['limit']   || rate['threshold']
-      interval  = rate['period']  || rate['interval']
-      name      = rate['name']    || DEFAULT_LIMIT_NAME
+      klass      = message['class']
+      rate       = message['rate']    || message['throttle'] || {}
+      limit      = rate['limit']      || rate['threshold']
+      interval   = rate['period']     || rate['interval']
+      name       = rate['name']       || DEFAULT_LIMIT_NAME
+      per_server = rate['per_server'] || false
 
       return work unless !!(klass && limit && interval)
 
       options = {
-        :limit    => limit,
-        :interval => interval,
-        :name     => name,
+        :limit      => limit,
+        :interval   => interval,
+        :name       => name,
+        :per_server => per_server
       }
 
       Sidekiq.redis do |conn|
@@ -46,8 +48,15 @@ module Sidekiq::RateLimiter
       options = options.dup
       name = options.delete('name') ||
              options.delete(:name)
+      scope_by_hostname = options.delete(:per_server)
 
-      super(name, redis, options)
+      super(scope_by_hostname ? "#{hostname}:#{name}" : name, redis, options)
+    end
+
+    private
+
+    def hostname
+      Socket.gethostname
     end
   end
 
