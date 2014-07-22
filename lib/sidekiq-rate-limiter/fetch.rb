@@ -6,7 +6,7 @@ module Sidekiq::RateLimiter
   DEFAULT_LIMIT_NAME =
     'sidekiq-rate-limit'.freeze unless defined?(DEFAULT_LIMIT_NAME)
 
-  class Fetch < Sidekiq::BasicFetch
+  module Limiter
     def retrieve_work
       limit(super)
     end
@@ -41,7 +41,16 @@ module Sidekiq::RateLimiter
         end
       end
     end
+  end
 
+  class Fetch < Sidekiq::BasicFetch
+    prepend Limiter
+  end
+
+  if (defined?(Sidekiq::Pro))
+    class ReliableFetch < Sidekiq::Pro::ReliableFetch
+      prepend Limiter
+    end
   end
 
   class Rate
