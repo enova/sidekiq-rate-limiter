@@ -12,6 +12,8 @@ module Sidekiq::RateLimiter
     end
 
     def limit(work)
+      return work if work.nil?
+
       message = JSON.parse(work.message) rescue {}
 
       args      = message['args']
@@ -56,6 +58,11 @@ module Sidekiq::RateLimiter
   if (defined?(Sidekiq::Pro))
     class ReliableFetch < Sidekiq::Pro::ReliableFetch
       prepend Limiter
+
+      def initialize(options)
+        super
+        Sidekiq.logger.info("ReliableFetch with throttler activated")
+      end
 
       def work_with_limit(work, message, options)
         klass = message['class']
