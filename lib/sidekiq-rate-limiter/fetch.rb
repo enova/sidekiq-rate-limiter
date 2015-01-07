@@ -6,12 +6,14 @@ module Sidekiq::RateLimiter
   DEFAULT_LIMIT_NAME =
     'sidekiq-rate-limit'.freeze unless defined?(DEFAULT_LIMIT_NAME)
 
-  class Fetch < Sidekiq::BasicFetch
+  module Limiter
     def retrieve_work
       limit(super)
     end
 
     def limit(work)
+      return work if work.nil?
+
       message = JSON.parse(work.message) rescue {}
 
       args      = message['args']
@@ -30,6 +32,16 @@ module Sidekiq::RateLimiter
         :name     => (name.respond_to?(:call) ? name.call(*args) : name).to_s,
       }
 
+      work_with_limit(work, message, options)
+    end
+  end
+
+  class Fetch < Sidekiq::BasicFetch
+    prepend Limiter
+
+    def work_with_limit(work, message, options)
+      klass = message['class']
+
       Sidekiq.redis do |conn|
         lim = Limit.new(conn, options)
         if lim.exceeded?(klass)
@@ -41,7 +53,32 @@ module Sidekiq::RateLimiter
         end
       end
     end
+  end
 
+  if (defined?(Sidekiq::Pro))
+    class ReliableFetch < Sidekiq::Pro::ReliableFetch
+      prepend Limiter
+
+      def initialize(options)
+        super
+        Sidekiq.logger.info("ReliableFetch with throttler activated")
+      end
+
+      def work_with_limit(work, message, options)
+        klass = message['class']
+
+        Sidekiq.redis do |conn|
+          lim = Limit.new(conn, options)
+          if lim.exceeded?(klass)
+            conn.rpoplpush(work.local_queue, work.queue)
+            nil
+          else
+            lim.add(klass)
+            work
+          end
+        end
+      end
+    end
   end
 
   class Rate
