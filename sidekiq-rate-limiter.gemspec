@@ -27,6 +27,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "simplecov-rcov"
 
   s.add_dependency "redis"
-  s.add_dependency "sidekiq", ">= 2.0", "< 4.0"
+  s.add_dependency "sidekiq", ">= 2.0", "< 5.0"
   s.add_dependency "redis_rate_limiter"
 end
