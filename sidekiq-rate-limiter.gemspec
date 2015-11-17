@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.license     = 'MIT'
   s.version     = Sidekiq::RateLimiter::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Blake Thomas", "Enova"]
+  s.authors     = ["Docady", "Blake Thomas", "Enova"]
   s.email       = ["bwthomas@gmail.com"]
   s.homepage    = "https://github.com/enova/sidekiq-rate-limiter"
   s.summary     = %q{Redis-backed, per-worker rate limits for job processing}
@@ -21,11 +21,12 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_development_dependency "pry"
+  s.add_development_dependency "pry-byebug"
   s.add_development_dependency "rake"
   s.add_development_dependency "rspec", '~> 3.4'
   s.add_development_dependency "coveralls", '~> 0.8'
 
   s.add_dependency "redis"
-  s.add_dependency "sidekiq", ">= 2.0", "< 4.0"
+  s.add_dependency "sidekiq", ">= 2.0", "< 5.0"
   s.add_dependency "redis_rate_limiter"
 end
