@@ -1,4 +1,3 @@
-require 'celluloid'
 require 'sidekiq/fetch'
 require 'redis_rate_limiter'
 
@@ -12,7 +11,7 @@ module Sidekiq::RateLimiter
     end
 
     def limit(work)
-      message = JSON.parse(work.message) rescue {}
+      message = JSON.parse(work.job) rescue {}
 
       args      = message['args']
       klass     = message['class']
@@ -33,7 +32,7 @@ module Sidekiq::RateLimiter
       Sidekiq.redis do |conn|
         lim = Limit.new(conn, options)
         if lim.exceeded?(klass)
-          conn.lpush("queue:#{work.queue_name}", work.message)
+          conn.lpush("queue:#{work.queue_name}", work.job)
           nil
         else
           lim.add(klass)

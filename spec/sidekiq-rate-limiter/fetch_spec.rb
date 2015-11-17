@@ -41,14 +41,14 @@ describe Sidekiq::RateLimiter::Fetch do
 
   it 'should retrieve work with strict setting' do
     fetch = described_class.new options.merge(:strict => true)
-    fetch.queues_cmd.should eql(["queue:#{queue}", "queue:#{another_queue}", 1])
+    fetch.queues_cmd.should eql(["queue:#{queue}", "queue:#{another_queue}", Sidekiq::BasicFetch::TIMEOUT])
   end
 
   it 'should retrieve work', queuing: true do
     worker.perform_async(*args)
-    fetch = described_class.new(options)
+    fetch   = described_class.new(options)
     work    = fetch.retrieve_work
-    parsed  = JSON.parse(work.message)
+    parsed  = JSON.parse(work.job)
 
     work.should_not be_nil
     work.queue_name.should eql(queue)

@@ -5,3 +5,6 @@ pkg/
 coverage/
 *.swp
 spec/support/redis/
+dump.rdb
+.pryrc
+.byebug_history
