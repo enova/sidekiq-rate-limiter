@@ -58,7 +58,7 @@ require File.expand_path("../../lib/sidekiq-rate-limiter", __FILE__)
 
 ## Hook to set Sidekiq::Testing mode using rspec tags
 RSpec.configure do |config|
-  config.before(:each) do
+  config.before(:each) do |example|
     ## Use metadata to determine testing behavior
     ## for queuing.
 
