@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.license     = 'MIT'
   s.version     = Sidekiq::RateLimiter::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Blake Thomas", "Enova", "Docady"]
-  s.email       = ["opensource@docady.com"]
+  s.authors     = ["Docady", "Blake Thomas", "Enova"]
+  s.email       = ["info@docady.com"]
   s.homepage    = "https://github.com/Docady/sidekiq-rate-limiter"
   s.summary     = %q{Redis-backed, per-worker rate limits for job processing}
   s.description = %q{Redis-backed, per-worker rate limits for job processing}
