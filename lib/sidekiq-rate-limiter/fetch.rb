@@ -11,7 +11,7 @@ module Sidekiq::RateLimiter
     end
 
     def limit(work)
-      message = JSON.parse(work.job) rescue {}
+      message = JSON.parse(work.respond_to?(:message) ? work.message : work.job) rescue {}
 
       args      = message['args']
       klass     = message['class']
@@ -32,7 +32,7 @@ module Sidekiq::RateLimiter
       Sidekiq.redis do |conn|
         lim = Limit.new(conn, options)
         if lim.exceeded?(klass)
-          conn.lpush("queue:#{work.queue_name}", work.job)
+          conn.lpush("queue:#{work.queue_name}", work.respond_to?(:message) ? work.message : work.job)
           nil
         else
           lim.add(klass)

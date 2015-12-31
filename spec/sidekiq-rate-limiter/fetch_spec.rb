@@ -48,7 +48,7 @@ describe Sidekiq::RateLimiter::Fetch do
     worker.perform_async(*args)
     fetch   = described_class.new(options)
     work    = fetch.retrieve_work
-    parsed  = JSON.parse(work.job)
+    parsed  = JSON.parse(work.respond_to?(:message) ? work.message : work.job)
 
     work.should_not be_nil
     work.queue_name.should eql(queue)
