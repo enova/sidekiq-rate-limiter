@@ -1,7 +1,9 @@
 sidekiq-rate-limiter
 ====================
 
-[![Build Status](https://secure.travis-ci.org/enova/sidekiq-rate-limiter.png)](http://travis-ci.org/enova/sidekiq-rate-limiter)
+[![Gem Version](https://badge.fury.io/rb/sidekiq-rate-limiter.svg)](https://rubygems.org/gems/sidekiq-rate-limiter)
+[![Build Status](https://secure.travis-ci.org/enova/sidekiq-rate-limiter.svg)](http://travis-ci.org/enova/sidekiq-rate-limiter)
+[![Dependency Status](https://gemnasium.com/enova/sidekiq-rate-limiter.svg)](https://gemnasium.com/enova/sidekiq-rate-limiter)
 
 Redis-backed, per-worker rate limits for job processing.
 
