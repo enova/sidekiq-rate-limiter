@@ -23,8 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "pry"
   s.add_development_dependency "rake"
   s.add_development_dependency "rspec", '~> 3.4'
-  s.add_development_dependency "simplecov"
-  s.add_development_dependency "simplecov-rcov"
+  s.add_development_dependency "coveralls", '~> 0.8'
 
   s.add_dependency "redis"
   s.add_dependency "sidekiq", ">= 2.0", "< 4.0"
