@@ -9,7 +9,7 @@ Redis-backed, per-worker rate limits for job processing.
 
 ## Compatibility
 
-sidekiq-rate-limiter is actively tested against MRI versions 2.0.0 and 1.9.3.
+sidekiq-rate-limiter is actively tested against MRI versions 2.1, 2.2, and 2.3.
 
 sidekiq-rate-limiter works by using a custom fetch class, the class responsible
 for pulling work from the queue stored in redis. Consequently you'll want to be
