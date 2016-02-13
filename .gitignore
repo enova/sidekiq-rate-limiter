@@ -8,3 +8,4 @@ spec/support/redis/
 dump.rdb
 .pryrc
 .byebug_history
+*.gemfile.lock
