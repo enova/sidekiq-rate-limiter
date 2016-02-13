@@ -52,6 +52,7 @@ require File.expand_path("../../lib/sidekiq-rate-limiter", __FILE__)
 
 ## Hook to set Sidekiq::Testing mode using rspec tags
 RSpec.configure do |config|
+  config.disable_monkey_patching!
   config.expose_current_running_example_as :example
 
   config.before(:each) do

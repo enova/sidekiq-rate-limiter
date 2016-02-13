@@ -1,20 +1,20 @@
 require 'spec_helper'
 
-describe Sidekiq::RateLimiter, 'server configuration' do
+RSpec.describe Sidekiq::RateLimiter, 'server configuration' do
   before do
-    Sidekiq.stub(:server? => true)
+    allow(Sidekiq).to receive(:server?).and_return true
     require 'sidekiq-rate-limiter/server'
   end
 
   it 'should set Sidekiq.options[:fetch] as desired' do
     Sidekiq.configure_server do |config|
-      Sidekiq.options[:fetch].should eql(Sidekiq::RateLimiter::Fetch)
+      expect(Sidekiq.options[:fetch]).to eql(Sidekiq::RateLimiter::Fetch)
     end
   end
 
   it 'should inherit from Sidekiq::BasicFetch' do
     Sidekiq.configure_server do |config|
-      Sidekiq.options[:fetch].should < Sidekiq::BasicFetch
+      expect(Sidekiq.options[:fetch]).to be < Sidekiq::BasicFetch
     end
   end
 end
