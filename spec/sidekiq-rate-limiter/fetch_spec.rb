@@ -40,8 +40,15 @@ describe Sidekiq::RateLimiter::Fetch do
   end
 
   it 'should retrieve work with strict setting' do
+    timeout =
+      if defined? Sidekiq::BasicFetch::TIMEOUT
+        Sidekiq::BasicFetch::TIMEOUT
+      else
+        Sidekiq::Fetcher::TIMEOUT
+      end
+
     fetch = described_class.new options.merge(:strict => true)
-    fetch.queues_cmd.should eql(["queue:#{queue}", "queue:#{another_queue}", Sidekiq::BasicFetch::TIMEOUT])
+    fetch.queues_cmd.should eql(["queue:#{queue}", "queue:#{another_queue}", timeout])
   end
 
   it 'should retrieve work', queuing: true do

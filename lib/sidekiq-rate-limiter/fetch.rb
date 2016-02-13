@@ -1,3 +1,5 @@
+require 'sidekiq'
+require 'celluloid' if Sidekiq::VERSION < "4"
 require 'sidekiq/fetch'
 require 'redis_rate_limiter'
 
