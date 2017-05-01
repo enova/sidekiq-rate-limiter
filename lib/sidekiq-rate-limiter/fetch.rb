@@ -2,6 +2,8 @@ require 'sidekiq'
 require 'celluloid' if Sidekiq::VERSION < "4"
 require 'sidekiq/fetch'
 require 'redis_rate_limiter'
+require 'sidekiq-rate-limiter/basic_strategy'
+require 'sidekiq-rate-limiter/sleep_strategy'
 
 module Sidekiq::RateLimiter
   DEFAULT_LIMIT_NAME =
@@ -31,18 +33,12 @@ module Sidekiq::RateLimiter
         :name     => (name.respond_to?(:call) ? name.call(*args) : name).to_s,
       }
 
-      Sidekiq.redis do |conn|
-        lim = Limit.new(conn, options)
-        if lim.exceeded?(klass)
-          conn.lpush("queue:#{work.queue_name}", work.respond_to?(:message) ? work.message : work.job)
-          nil
-        else
-          lim.add(klass)
-          work
-        end
-      end
+      fetch_strategy.call(work, klass, options)
     end
 
+    def fetch_strategy
+      Sidekiq::RateLimiter.configuration.fetch_strategy.new
+    end
   end
 
   class Rate

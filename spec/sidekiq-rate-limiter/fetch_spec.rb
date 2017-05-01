@@ -81,6 +81,48 @@ RSpec.describe Sidekiq::RateLimiter::Fetch do
     expect(q.size).to eq 1
   end
 
+  context 'with the sleep strategy' do
+    before :each do
+      Sidekiq::RateLimiter.configure do |config|
+        config.fetch_strategy = Sidekiq::RateLimiter::SleepStrategy
+      end
+    end
+
+    it 'should place rate-limited work at the back of the queue immediately when retry_in? is less than 1.0', queuing: true do
+      worker.perform_async(*args)
+      expect_any_instance_of(Sidekiq::RateLimiter::Limit).to receive(:exceeded?).and_return(true)
+      expect_any_instance_of(redis_class).to receive(:lpush).exactly(:once).and_call_original
+
+      expect_any_instance_of(Sidekiq::RateLimiter::Limit).to receive(:retry_in?).and_return(0.1)
+      expect_any_instance_of(Sidekiq::RateLimiter::SleepStrategy).to_not receive(:sleep)
+
+      fetch = described_class.new(options)
+      expect(fetch.retrieve_work).to be_nil
+
+      q = Sidekiq::Queue.new(queue)
+      expect(q.size).to eq 1
+    end
+
+    it 'should call sleep when appropriate' do
+      worker.perform_async(*args)
+      expect_any_instance_of(Sidekiq::RateLimiter::Limit).to receive(:exceeded?).and_return(true)
+      expect_any_instance_of(Sidekiq::RateLimiter::Limit).to receive(:retry_in?).and_return(2.0)
+      expect_any_instance_of(Sidekiq::RateLimiter::SleepStrategy).to receive(:sleep).with(1).and_return(true)
+
+      expect_any_instance_of(redis_class).to receive(:lpush).exactly(:once).and_call_original
+
+      fetch = described_class.new(options)
+      expect(fetch.retrieve_work).to be_nil
+
+      q = Sidekiq::Queue.new(queue)
+      expect(q.size).to eq 1
+    end
+
+    after :each do
+      Sidekiq::RateLimiter.reset
+    end
+  end
+
   it 'should accept procs for limit, name, and period config keys', queuing: true do
     proc_worker.perform_async(1,2)
 
