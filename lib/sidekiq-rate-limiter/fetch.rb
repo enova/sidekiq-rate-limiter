@@ -4,6 +4,7 @@ require 'sidekiq/fetch'
 require 'redis_rate_limiter'
 require 'sidekiq-rate-limiter/basic_strategy'
 require 'sidekiq-rate-limiter/sleep_strategy'
+require 'sidekiq-rate-limiter/schedule_in_future_strategy'
 
 module Sidekiq::RateLimiter
   DEFAULT_LIMIT_NAME =
@@ -33,7 +34,7 @@ module Sidekiq::RateLimiter
         :name     => (name.respond_to?(:call) ? name.call(*args) : name).to_s,
       }
 
-      fetch_strategy.call(work, klass, options)
+      fetch_strategy.call(work, klass, args, options)
     end
 
     def fetch_strategy

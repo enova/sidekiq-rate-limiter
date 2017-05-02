@@ -1,10 +1,11 @@
 module Sidekiq::RateLimiter
-  class BasicStrategy
+  class ScheduleInFutureStrategy
     def call(work, klass, args, options)
       Sidekiq.redis do |conn|
         lim = Limit.new(conn, options)
         if lim.exceeded?(klass)
-          conn.lpush("queue:#{work.queue_name}", work.respond_to?(:message) ? work.message : work.job)
+          # Schedule the job to be executed in the future, when we think the rate limit might be back to normal.
+          Sidekiq::Client.enqueue_to_in(work.queue_name, lim.retry_in?(klass), Object.const_get(klass), *args)
           nil
         else
           lim.add(klass)
@@ -14,3 +15,4 @@ module Sidekiq::RateLimiter
     end
   end
 end
+

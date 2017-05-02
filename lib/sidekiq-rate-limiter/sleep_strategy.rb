@@ -1,6 +1,6 @@
 module Sidekiq::RateLimiter
   class SleepStrategy
-    def call(work, klass, options)
+    def call(work, klass, args, options)
       Sidekiq.redis do |conn|
         lim = Limit.new(conn, options)
         if lim.exceeded?(klass)
