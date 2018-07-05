@@ -4,7 +4,6 @@ sidekiq-rate-limiter
 [![Gem Version](https://badge.fury.io/rb/sidekiq-rate-limiter.svg)](https://rubygems.org/gems/sidekiq-rate-limiter)
 [![Build Status](https://secure.travis-ci.org/enova/sidekiq-rate-limiter.svg?branch=master)](http://travis-ci.org/enova/sidekiq-rate-limiter)
 [![Coverage Status](https://coveralls.io/repos/github/enova/sidekiq-rate-limiter/badge.svg?branch=master)](https://coveralls.io/github/enova/sidekiq-rate-limiter?branch=master)
-[![Dependency Status](https://gemnasium.com/enova/sidekiq-rate-limiter.svg)](https://gemnasium.com/enova/sidekiq-rate-limiter)
 
 Redis-backed, per-worker rate limits for job processing.
 
@@ -32,7 +31,7 @@ class MyWorker
 end
 ```
 
-Then you wouldn't need to change anything. 
+Then you wouldn't need to change anything.
 
 ## Installation
 
