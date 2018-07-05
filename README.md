@@ -9,10 +9,10 @@ Redis-backed, per-worker rate limits for job processing.
 
 ## Compatibility
 
-sidekiq-rate-limiter is actively tested against MRI versions 2.1, 2.2, and 2.3.
+sidekiq-rate-limiter is actively tested against MRI versions 2.4 and 2.5.
 
 sidekiq-rate-limiter works by using a custom fetch class, the class responsible
-for pulling work from the queue stored in redis. Consequently you'll want to be
+for pulling work from the queue stored in Redis. Consequently you'll want to be
 careful about using other gems that use a same strategy, [sidekiq-priority](https://github.com/socialpandas/sidekiq-priority)
 being one example.
 
@@ -59,12 +59,14 @@ require 'sidekiq-rate-limiter/server'
 
 Or, if you prefer, amend your Gemfile like so:
 
-    gem 'sidekiq-rate-limiter', :require => 'sidekiq-rate-limiter/server'
+```ruby
+gem 'sidekiq-rate-limiter', require: 'sidekiq-rate-limiter/server'
+```
 
-By default the limiter uses the name 'sidekiq-rate-limiter'. You can define the
-constant ```Sidekiq::RateLimiter::DEFAULT_LIMIT_NAME``` prior to requiring to
-change this. Alternatively, you can include a 'name' parameter in the configuration
-hash included in sidekiq_options
+By default the limiter uses the name `sidekiq-rate-limiter`. You can define the
+constant `Sidekiq::RateLimiter::DEFAULT_LIMIT_NAME` prior to requiring to
+change this. Alternatively, you can include a `name` parameter in the configuration
+hash included in `sidekiq_options`
 
 For example, the following:
 
@@ -85,7 +87,7 @@ For example, the following:
 ```
 
 The configuration above would result in any jobs beyond the first 50 in a one
-hour period being delayed. The server will continue to fetch items from redis, &
+hour period being delayed. The server will continue to fetch items from Redis, &
 will place any items that are beyond the threshold at the back of their queue.
 
 ### Dynamic Configuration
@@ -119,9 +121,9 @@ limited multiple times are counted as 'processed' each time, so the stats balloo
 
 ## TODO
 
-* While it subclasses instead of monkey patching, setting Sidekiq.options[:fetch]
+* While it subclasses instead of monkey patching, setting `Sidekiq.options[:fetch]`
 is still asking for interaction issues. It would be better for this to be directly
-in sidekiq or to use some other means to accomplish this goal.
+in Sidekiq or to use some other means to accomplish this goal.
 
 ## Contributing
 
