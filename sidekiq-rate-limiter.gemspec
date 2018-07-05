@@ -26,6 +26,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec", '~> 3.4'
   s.add_development_dependency "coveralls", '~> 0.8'
 
-  s.add_dependency "sidekiq", ">= 2.0", "< 5.0"
+  s.add_dependency "sidekiq", ">= 2.0", "< 6.0"
   s.add_dependency "redis_rate_limiter"
 end
