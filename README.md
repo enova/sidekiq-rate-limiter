@@ -74,11 +74,11 @@ For example, the following:
   class Job
     include Sidekiq::Worker
 
-    sidekiq_options :queue => 'some_silly_queue',
-                    :rate  => {
-                      :name   => 'my_super_awesome_rate_limit',
-                      :limit  => 50,
-                      :period => 3600, ## An hour
+    sidekiq_options queue: 'some_silly_queue',
+                    rate: {
+                      name:   'my_super_awesome_rate_limit',
+                      limit:  50,
+                      period: 3600, ## An hour
                     }
 
     def perform(*args)
@@ -100,11 +100,11 @@ The `Proc` may receive as its arguments the same values that will be passed to `
 class Job
   include Sidekiq::Worker
 
-  sidekiq_options :queue => "my_queue",
-                  :rate => {
-                    :name   => ->(user_id, rate_limit) { user_id },
-                    :limit  => ->(user_id, rate_limit) { rate_limit },
-                    :period => ->{ Date.today.monday? ? 2.hours : 4.hours }, # can ignore arguments
+  sidekiq_options queue: "my_queue",1
+                  rate: {
+                    name:   ->(user_id, rate_limit) { user_id },
+                    limit:  ->(user_id, rate_limit) { rate_limit },
+                    period: ->{ Date.today.monday? ? 2.hours : 4.hours }, # can ignore arguments
                   }
 
   def perform(user_id, rate_limit)
