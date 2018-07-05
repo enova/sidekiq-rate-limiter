@@ -89,7 +89,7 @@ module Sidekiq::RateLimiter
       worker_class = @message['class']
       options = Object.const_get(worker_class).get_sidekiq_options rescue {}
       server_rate = options['rate'] || options['throttle'] || {}
-      @server_rate = server_rate.stringify_keys
+      @server_rate = server_rate.map { |k, v| [k.to_s, v] }.to_h
     end
   end
 
