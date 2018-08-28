@@ -1,6 +1,7 @@
 require 'sidekiq'
 require 'sidekiq/fetch'
 require 'redis_rate_limiter'
+require 'redis-semaphore'
 
 module Sidekiq::RateLimiter
   DEFAULT_LIMIT_NAME =
@@ -31,17 +32,23 @@ module Sidekiq::RateLimiter
       }
 
       Sidekiq.redis do |conn|
+        s = Redis::Semaphore.new(:sidekiq_rate_limit_exceeded_check, redis: conn)
         lim = Limit.new(conn, options)
-        if lim.exceeded?(klass)
+        limit_exceeded = nil
+
+        s.lock do
+          limit_exceeded = lim.exceeded?(klass)
+          lim.add(klass) unless limit_exceeded
+        end
+
+        if limit_exceeded
           conn.lpush("queue:#{work.queue_name}", work.respond_to?(:message) ? work.message : work.job)
           nil
         else
-          lim.add(klass)
           work
         end
       end
     end
-
   end
 
   class Rate

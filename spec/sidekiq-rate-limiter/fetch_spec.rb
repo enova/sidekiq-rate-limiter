@@ -72,7 +72,8 @@ RSpec.describe Sidekiq::RateLimiter::Fetch do
   it 'should place rate-limited work at the back of the queue', queuing: true do
     worker.perform_async(*args)
     expect_any_instance_of(Sidekiq::RateLimiter::Limit).to receive(:exceeded?).and_return(true)
-    expect_any_instance_of(redis_class).to receive(:lpush).exactly(:once).and_call_original
+    expect_any_instance_of(redis_class).to receive(:lpush).with("SEMAPHORE:sidekiq_rate_limit_exceeded_check:AVAILABLE", anything).exactly(:once).and_call_original
+    expect_any_instance_of(redis_class).to receive(:lpush).with("queue:basic", anything).exactly(:once).and_call_original
 
     fetch = described_class.new(options)
     expect(fetch.retrieve_work).to be_nil
