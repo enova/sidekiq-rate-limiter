@@ -32,7 +32,7 @@ module Sidekiq::RateLimiter
       }
 
       Sidekiq.redis do |conn|
-        s = Redis::Semaphore.new(:sidekiq_rate_limit_exceeded_check, redis: conn)
+        s = Redis::Semaphore.new(:sidekiq_rate_limit_exceeded_check, redis: Sidekiq::RedisConnection.create, stale_client_timeout: 60)
         lim = Limit.new(conn, options)
         limit_exceeded = nil
 
