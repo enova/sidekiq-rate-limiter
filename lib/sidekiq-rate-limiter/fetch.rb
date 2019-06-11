@@ -26,7 +26,7 @@ module Sidekiq::RateLimiter
 
       options = {
         :limit    => (limit.respond_to?(:call) ? limit.call(*args) : limit).to_i,
-        :interval => (interval.respond_to?(:call) ? interval.call(*args) : interval).to_f,
+        :interval => (interval.respond_to?(:call) ? interval.call(*args) : interval).to_i,
         :name     => (name.respond_to?(:call) ? name.call(*args) : name).to_s,
       }
 
