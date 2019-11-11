@@ -8,6 +8,12 @@ rvm:
 gemfile:
   - 'gemfiles/sidekiq_4.gemfile'
   - 'gemfiles/sidekiq_5.gemfile'
+  - 'gemfiles/sidekiq_6.gemfile'
+
+matrix:
+  exclude:
+    - rvm: 2.4.4
+      gemfile: gemfiles/sidekiq_6.gemfile
 
 deploy:
   provider: rubygems
