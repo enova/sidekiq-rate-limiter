@@ -28,4 +28,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency "sidekiq", ">= 4.0", "< 7.0"
   s.add_dependency "redis_rate_limiter"
+  s.add_dependency "redis-semaphore"
 end
