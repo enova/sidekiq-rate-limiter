@@ -1,3 +1,8 @@
+## 0.1.4 (Unreleased)
+
+* Add Sidekiq 6 support
+* Remove depricated rubyforge_project from gemspec
+
 ## 0.1.3 (Oct 15, 2019)
 
 * Fix errors when using with redis-rb > 4.1.0 [#30, #31]
