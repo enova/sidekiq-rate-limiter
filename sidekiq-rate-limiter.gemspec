@@ -13,7 +13,6 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/enova/sidekiq-rate-limiter"
   s.summary     = %q{Redis-backed, per-worker rate limits for job processing}
   s.description = %q{Redis-backed, per-worker rate limits for job processing}
-  s.rubyforge_project = "nowarning"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
