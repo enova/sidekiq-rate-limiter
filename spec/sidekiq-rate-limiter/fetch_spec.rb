@@ -27,7 +27,11 @@ RSpec.describe Sidekiq::RateLimiter::Fetch do
     end
   end
 
-  let(:options)       { { queues: [queue, another_queue, another_queue] } }
+  let(:options)       {
+    s = Sidekiq
+    s[:queues] = [queue, another_queue, another_queue]
+    s
+  }
   let(:queue)         { 'basic' }
   let(:another_queue) { 'some_other_queue' }
   let(:args)          { ['I am some args'] }
@@ -47,7 +51,7 @@ RSpec.describe Sidekiq::RateLimiter::Fetch do
         Sidekiq::Fetcher::TIMEOUT
       end
 
-    fetch = described_class.new options.merge(:strict => true)
+    fetch = described_class.new options.merge!(:strict => true)
     expect(fetch.queues_cmd).to eql(["queue:#{queue}", "queue:#{another_queue}", timeout])
   end
 
