@@ -1,3 +1,9 @@
+## 0.2.0 (Mar 1, 2023)
+
+* Upstream fix for sidekiq 6.5.0 [#43, thanks to 5minpause]
+* Add support for new Sidekiq's configuration model [#42, thanks to anero]
+* gemspec: Drop defunct property rubyforge_project [#37, thanks to olleolleolle]
+
 ## 0.1.3 (Oct 15, 2019)
 
 * Fix errors when using with redis-rb > 4.1.0 [#30, #31]

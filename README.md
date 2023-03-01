@@ -2,14 +2,14 @@ sidekiq-rate-limiter
 ====================
 
 [![Gem Version](https://badge.fury.io/rb/sidekiq-rate-limiter.svg)](https://rubygems.org/gems/sidekiq-rate-limiter)
-[![Build Status](https://secure.travis-ci.org/enova/sidekiq-rate-limiter.svg?branch=master)](http://travis-ci.org/enova/sidekiq-rate-limiter)
+[![Test Status](https://github.com/enova/sidekiq-rate-limiter/actions/workflows/test.yml/badge.svg)](https://github.com/enova/sidekiq-rate-limiter/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/github/enova/sidekiq-rate-limiter/badge.svg?branch=master)](https://coveralls.io/github/enova/sidekiq-rate-limiter?branch=master)
 
 Redis-backed, per-worker rate limits for job processing.
 
 ## Compatibility
 
-sidekiq-rate-limiter is actively tested against MRI versions 2.4 and 2.5.
+sidekiq-rate-limiter is actively tested against MRI versions 2.7 and 3.1.
 
 sidekiq-rate-limiter works by using a custom fetch class, the class responsible
 for pulling work from the queue stored in Redis. Consequently you'll want to be
