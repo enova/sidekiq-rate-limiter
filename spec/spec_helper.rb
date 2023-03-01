@@ -1,5 +1,6 @@
 require 'sidekiq'
 require 'sidekiq/testing'
+require 'pry-byebug'
 
 ## Confirming presence of redis server executable
 abort "## `redis-server` not in path" if %x(which redis-server).empty?
