@@ -36,7 +36,7 @@ SimpleCov.start do
     formatter SimpleCov::Formatter::LcovFormatter
   end
 
-  add_filter %w[version.rb]
+  add_filter %w[version.rb spec/]
 end
 
 require File.expand_path("../../lib/sidekiq-rate-limiter", __FILE__)

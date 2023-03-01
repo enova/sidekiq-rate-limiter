@@ -29,7 +29,20 @@ jobs:
         uses: supercharge/redis-github-action@1.5.0
 
       - name: Run tests
-        run: bundle exec rake
+        run: bundle exec --gemfile=gemfiles/sidekiq_${{ matrix.sidekiq-version }}.gemfile rspec
 
       - name: Coveralls
         uses: coverallsapp/github-action@v1
+        with:
+          flag-name: run-${{ join(matrix.*, '-') }}
+          parallel: true
+      
+  finish:
+    needs: test
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@v1
+      with:
+        parallel-finished: true
