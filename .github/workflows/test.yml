@@ -1,0 +1,48 @@
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        ruby-version: ['3.1', '2.7']
+        sidekiq-version: ['4', '5', '6.0', '6.1', '6.x']
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Ruby ${{ matrix.ruby-version }}
+        uses: ruby/setup-ruby@359bebbc29cbe6c87da6bc9ea3bc930432750108
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+
+      - name: Install dependencies
+        run: bundle install --gemfile=gemfiles/sidekiq_${{ matrix.sidekiq-version }}.gemfile
+
+      - name: Start Redis
+        uses: supercharge/redis-github-action@1.5.0
+
+      - name: Run tests
+        run: bundle exec --gemfile=gemfiles/sidekiq_${{ matrix.sidekiq-version }}.gemfile rspec
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@v1
+        with:
+          flag-name: run-${{ join(matrix.*, '-') }}
+          parallel: true
+      
+  finish:
+    needs: test
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@v1
+      with:
+        parallel-finished: true
