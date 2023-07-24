@@ -12,8 +12,8 @@ Redis-backed, per-worker rate limits for job processing.
 sidekiq-rate-limiter is actively tested against MRI versions 2.7 and 3.1.
 
 sidekiq-rate-limiter works by using a custom fetch class, the class responsible
-for pulling work from the queue stored in Redis. Consequently you'll want to be
-careful about using other gems that use a same strategy, [sidekiq-priority](https://github.com/socialpandas/sidekiq-priority)
+for pulling work from the queue stored in Redis. Consequently, you'll want to be
+careful about using other gems that use the same strategy, [sidekiq-priority](https://github.com/socialpandas/sidekiq-priority)
 being one example.
 
 I've attempted to support the same options as used by [sidekiq-throttler](https://github.com/gevans/sidekiq-throttler). So, if
@@ -50,7 +50,7 @@ Or install it yourself as:
 ## Configuration
 
 See [server.rb](lib/sidekiq-rate-limiter/server.rb) for an example of how to
-configure sidekiq-rate-limiter. Alternatively you can add the following to your
+configure sidekiq-rate-limiter. Alternatively, you can add the following to your
 initializer or what-have-you:
 
 ```ruby
@@ -63,7 +63,7 @@ Or, if you prefer, amend your Gemfile like so:
 gem 'sidekiq-rate-limiter', require: 'sidekiq-rate-limiter/server'
 ```
 
-By default the limiter uses the name `sidekiq-rate-limiter`. You can define the
+By default, the limiter uses the name `sidekiq-rate-limiter`. You can define the
 constant `Sidekiq::RateLimiter::DEFAULT_LIMIT_NAME` prior to requiring to
 change this. Alternatively, you can include a `name` parameter in the configuration
 hash included in `sidekiq_options`
@@ -86,8 +86,7 @@ For example, the following:
       ## ...
 ```
 
-The configuration above would result in any jobs beyond the first 50 in a one
-hour period being delayed. The server will continue to fetch items from Redis, &
+The configuration above would result in any jobs beyond the first 50 in a one-hour period being delayed. The server will continue to fetch items from Redis, &
 will place any items that are beyond the threshold at the back of their queue.
 
 ### Dynamic Configuration
@@ -100,7 +99,7 @@ The `Proc` may receive as its arguments the same values that will be passed to `
 class Job
   include Sidekiq::Worker
 
-  sidekiq_options queue: "my_queue",1
+  sidekiq_options queue: "my_queue",
                   rate: {
                     name:   ->(user_id, rate_limit) { user_id },
                     limit:  ->(user_id, rate_limit) { rate_limit },
@@ -115,7 +114,7 @@ class Job
 
 ## Motivation
 
-Sidekiq::Throttler is great for smaller quantities of jobs, but falls down a bit
+Sidekiq::Throttler is great for smaller quantities of jobs but falls down a bit
 for larger queues (see [issue #8](https://github.com/gevans/sidekiq-throttler/issues/8)). In addition, jobs that are
 limited multiple times are counted as 'processed' each time, so the stats balloon quickly.
 
