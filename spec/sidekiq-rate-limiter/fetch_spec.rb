@@ -63,22 +63,25 @@ RSpec.describe Sidekiq::RateLimiter::Fetch do
     expect(fetch.queues_cmd).to eql(["queue:#{queue}", "queue:#{another_queue}", timeout])
   end
 
-  it 'should retrieve work', queuing: true do
-    worker.perform_async(*args)
-    fetch   = described_class.new(options)
-    work    = fetch.retrieve_work
-    parsed  = JSON.parse(work.respond_to?(:message) ? work.message : work.job)
+  shared_examples 'retrieve_work' do |parameter|
 
-    expect(work).not_to be_nil
-    expect(work.queue_name).to eql(queue)
-    expect(work.acknowledge).to be_nil
+    it 'should retrieve work', queuing: true do
+      worker.perform_async(*args)
+      fetch   = described_class.new(options)
+      work    = fetch.retrieve_work
+      parsed  = JSON.parse(work.respond_to?(:message) ? work.message : work.job)
 
-    expect(parsed).to include(worker.get_sidekiq_options)
-    expect(parsed).to include("class" => worker.to_s, "args" => args)
-    expect(parsed).to include("jid", "enqueued_at")
+      expect(work).not_to be_nil
+      expect(work.queue_name).to eql(queue)
+      expect(work.acknowledge).to be_nil
 
-    q = Sidekiq::Queue.new(queue)
-    expect(q.size).to eq 0
+      expect(parsed).to include(worker.get_sidekiq_options)
+      expect(parsed).to include("class" => worker.to_s, "args" => args)
+      expect(parsed).to include("jid", "enqueued_at")
+
+      q = Sidekiq::Queue.new(queue)
+      expect(q.size).to eq 0
+    end
   end
 
   it 'should place rate-limited work at the back of the queue', queuing: true do
@@ -91,6 +94,85 @@ RSpec.describe Sidekiq::RateLimiter::Fetch do
 
     q = Sidekiq::Queue.new(queue)
     expect(q.size).to eq 1
+  end
+
+  context 'with the basic strategy' do
+    include_examples 'retrieve_work'
+  end
+
+  context 'with the sleep strategy' do
+    before :each do
+      Sidekiq::RateLimiter.configure do |config|
+        config.fetch_strategy = Sidekiq::RateLimiter::SleepStrategy
+      end
+    end
+
+    include_examples 'retrieve_work'
+
+    it 'should place rate-limited work at the back of the queue immediately when retry_in? is less than 1.0', queuing: true do
+      worker.perform_async(*args)
+      expect_any_instance_of(Sidekiq::RateLimiter::Limit).to receive(:exceeded?).and_return(true)
+      expect_any_instance_of(redis_class).to receive(:lpush).exactly(:once).and_call_original
+
+      expect_any_instance_of(Sidekiq::RateLimiter::Limit).to receive(:retry_in?).and_return(0.1)
+      expect_any_instance_of(Sidekiq::RateLimiter::SleepStrategy).to_not receive(:sleep)
+
+      fetch = described_class.new(options)
+      expect(fetch.retrieve_work).to be_nil
+
+      q = Sidekiq::Queue.new(queue)
+      expect(q.size).to eq 1
+    end
+
+    it 'should call sleep when appropriate' do
+      worker.perform_async(*args)
+      expect_any_instance_of(Sidekiq::RateLimiter::Limit).to receive(:exceeded?).and_return(true)
+      expect_any_instance_of(Sidekiq::RateLimiter::Limit).to receive(:retry_in?).and_return(2.0)
+      expect_any_instance_of(Sidekiq::RateLimiter::SleepStrategy).to receive(:sleep).with(1).and_return(true)
+
+      expect_any_instance_of(redis_class).to receive(:lpush).exactly(:once).and_call_original
+
+      fetch = described_class.new(options)
+      expect(fetch.retrieve_work).to be_nil
+
+      q = Sidekiq::Queue.new(queue)
+      expect(q.size).to eq 1
+    end
+
+    after :each do
+      Sidekiq::RateLimiter.reset
+    end
+  end
+
+  context 'with the schedule in the future strategy' do
+    before :each do
+      Sidekiq::RateLimiter.configure do |config|
+        config.fetch_strategy = Sidekiq::RateLimiter::ScheduleInFutureStrategy
+      end
+    end
+
+    include_examples 'retrieve_work'
+
+    it 'should place rate-limited work at the back of the queue', queuing: true do
+      worker.perform_async(*args)
+      expect_any_instance_of(Sidekiq::RateLimiter::Limit).to receive(:exceeded?).and_return(true)
+
+      expect_any_instance_of(Sidekiq::RateLimiter::Limit).to receive(:retry_in?).and_return(100)
+
+      fetch = described_class.new(options)
+      expect(fetch.retrieve_work).to be_nil
+
+      # expect the job to move to being scheduled in the future
+      q = Sidekiq::Queue.new(queue)
+      expect(q.size).to eq(0)
+
+      ss = Sidekiq::ScheduledSet.new
+      expect(ss.size).to eq(1)
+    end
+
+    after :each do
+      Sidekiq::RateLimiter.reset
+    end
   end
 
   it 'should accept procs for limit, name, and period config keys', queuing: true do
