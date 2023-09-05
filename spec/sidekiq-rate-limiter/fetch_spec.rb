@@ -30,6 +30,10 @@ RSpec.describe Sidekiq::RateLimiter::Fetch do
   let(:options) do
     if Sidekiq::VERSION =~ /^(4|5|6\.[0-4])/
       { queues: [queue, another_queue, another_queue] }
+    elsif Sidekiq::VERSION.start_with?('7.')
+      config = Sidekiq.default_configuration
+      config.queues = [queue, another_queue, another_queue]
+      config.default_capsule
     else
       Sidekiq.tap { |s| s[:queues] = [queue, another_queue, another_queue] }
     end
@@ -59,7 +63,12 @@ RSpec.describe Sidekiq::RateLimiter::Fetch do
       timeout = _timeout
     end
 
-    fetch = described_class.new options.merge!(:strict => true)
+    if !Sidekiq::VERSION.start_with?('7.')
+      options.merge!(strict: true)
+    end
+
+    fetch = described_class.new(options)
+
     expect(fetch.queues_cmd).to eql(["queue:#{queue}", "queue:#{another_queue}", timeout])
   end
 
