@@ -32,7 +32,7 @@ jobs:
         run: bundle exec --gemfile=gemfiles/sidekiq_${{ matrix.sidekiq-version }}.gemfile rspec
 
       - name: Coveralls
-        uses: coverallsapp/github-action@v1
+        uses: coverallsapp/github-action@v2
         with:
           flag-name: run-${{ join(matrix.*, '-') }}
           parallel: true
@@ -43,6 +43,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
-      uses: coverallsapp/github-action@v1
+      uses: coverallsapp/github-action@v2
       with:
         parallel-finished: true
