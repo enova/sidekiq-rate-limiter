@@ -63,13 +63,16 @@ RSpec.describe Sidekiq::RateLimiter::Fetch do
       timeout = _timeout
     end
 
+    expected = [ "queue:#{queue}", "queue:#{another_queue}" ]
+
     if !Sidekiq::VERSION.start_with?('7.')
       options.merge!(strict: true)
+      expected.push(timeout)
     end
 
     fetch = described_class.new(options)
 
-    expect(fetch.queues_cmd).to eql(["queue:#{queue}", "queue:#{another_queue}", timeout])
+    expect(fetch.queues_cmd).to eql(expected)
   end
 
   it 'should retrieve work', queuing: true do
