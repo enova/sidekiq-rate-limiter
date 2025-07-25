@@ -7,6 +7,8 @@ Sidekiq.configure_server do |config|
     Sidekiq.options[:fetch] = Sidekiq::RateLimiter::Fetch
   elsif (Sidekiq::VERSION < '6.5.0') # Sidekiq config was redesigned in https://github.com/mperham/sidekiq/pull/5340
     Sidekiq.options[:fetch] = Sidekiq::RateLimiter::Fetch.new(Sidekiq.options)
+  elsif (Sidekiq::VERSION >= '7.0')
+    config[:fetch_class] = Sidekiq::RateLimiter::Fetch
   else
     Sidekiq[:fetch] = Sidekiq::RateLimiter::Fetch.new(Sidekiq)
   end

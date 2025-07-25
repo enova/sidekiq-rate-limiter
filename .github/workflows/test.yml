@@ -12,13 +12,13 @@ jobs:
     strategy:
       matrix:
         ruby-version: ['3.1', '2.7']
-        sidekiq-version: ['4', '5', '6.0', '6.1', '6.x']
+        sidekiq-version: ['4', '5', '6.0', '6.1', '6.x', '7.x']
 
     steps:
       - uses: actions/checkout@v3
 
       - name: Set up Ruby ${{ matrix.ruby-version }}
-        uses: ruby/setup-ruby@359bebbc29cbe6c87da6bc9ea3bc930432750108
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby-version }}
 
@@ -32,7 +32,7 @@ jobs:
         run: bundle exec --gemfile=gemfiles/sidekiq_${{ matrix.sidekiq-version }}.gemfile rspec
 
       - name: Coveralls
-        uses: coverallsapp/github-action@v1
+        uses: coverallsapp/github-action@v2
         with:
           flag-name: run-${{ join(matrix.*, '-') }}
           parallel: true
@@ -43,6 +43,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
-      uses: coverallsapp/github-action@v1
+      uses: coverallsapp/github-action@v2
       with:
         parallel-finished: true
